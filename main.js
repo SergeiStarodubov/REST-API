@@ -18,32 +18,34 @@ app.get("/api/users/:id", (req, res) => {
   const content = fs.readFileSync("users.json", "utf-8");
   const users = JSON.parse(content);
   const id = req.params.id;
-  console.log(id);
-  let name, age;
+  const user = {};
   users.forEach(person => {
     if (person.id === +id) {
-      name = person.name;
-      age = person.age
+      user.name = person.name;
+      user.age = person.age;
+      user.id = person.id;
     }
   });
-  if (name === undefined || age === undefined) res.status(404).send();
-  const text = "you are looking for " + name + " " + age + " years old";
-  res.send(text);
+  if (user.name === undefined) res.status(404).send();
+  const jsonObj = JSON.stringify(user);
+  res.send(jsonObj);
 });
 
 app.post("/api/users", jsonParser, (req, res) => {
   if(!req.body) res.status(400).send();
-  const user = {
-    name: req.body.name,
-    age: req.body.age
-  };
-
+  
   let data = fs.readFileSync("users.json", "utf-8");
   let users = JSON.parse(data);
   let maxId = Math.max(...users.map((user) => {
     return user.id;
   }));
-  user.id = ++id;
+
+  let user = {
+    id: ++maxId,
+    name: req.body.name,
+    age: req.body.age
+  };
+  
   users.push(user);
   data = JSON.stringify(users);
   fs.writeFileSync("users.json", data);
@@ -51,7 +53,6 @@ app.post("/api/users", jsonParser, (req, res) => {
 });
 
 app.delete("/api/users/:id", function(req, res){
-      
     let id = req.params.id;
     let data = fs.readFileSync("users.json", "utf8");
     let users = JSON.parse(data);
