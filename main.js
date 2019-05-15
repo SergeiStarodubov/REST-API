@@ -78,9 +78,7 @@ app.delete("/api/users/:id", function(req, res){
 });
 
 app.put("/api/users", jsonParser, function(req, res){
-      
   if(!req.body) return res.sendStatus(400);
-
   let userId = req.body.id;
   let userName = req.body.name;
   let userAge = req.body.age;
@@ -88,18 +86,17 @@ app.put("/api/users", jsonParser, function(req, res){
   let users = JSON.parse(data);
   let user;
   for(let i = 0; i < users.length; i++){
-      if(users[i].id == userId){
-          user = users[i];
-          break;
-      }
+    if(users[i].id == userId){
+      user = users[i];
+      break;
+    }
   }
-
   if(user){
-      user.age = userAge;
-      user.name = userName;
-      let data = JSON.stringify(users);
-      fs.writeFileSync("users.json", data);
-      res.send(user);
+    user.age = userAge;
+    user.name = userName;
+    let data = JSON.stringify(users);
+    fs.writeFileSync("users.json", data);
+    res.send(user);
   }
   else{
       res.status(404).send(user);
