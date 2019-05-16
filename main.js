@@ -32,74 +32,81 @@ app.get("/api/users/:id", (req, res) => {
 });
 
 app.post("/api/users", jsonParser, (req, res) => {
-  if(!req.body) res.status(400).send();
-  
+  if (!req.body) res.status(400).send();
+
   let data = fs.readFileSync("users.json", "utf-8");
   let users = JSON.parse(data);
-  let maxId = Math.max(...users.map((user) => {
-    return user.id;
-  }));
+  let maxId = Math.max(
+    ...users.map(user => {
+      return user.id;
+    })
+  );
 
   let user = {
     id: ++maxId,
     name: req.body.name,
     age: req.body.age
   };
-  
+
   users.push(user);
   data = JSON.stringify(users);
   fs.writeFileSync("users.json", data);
   res.send(data);
 });
 
-app.delete("/api/users/:id", function(req, res){
-    let id = req.params.id;
-    let data = fs.readFileSync("users.json", "utf8");
-    let users = JSON.parse(data);
-    let index = -1;
-    // находим индекс пользователя в массиве
-    for(let i=0; i<users.length; i++){
-        if(users[i].id==id){
-            index=i;
-            break;
-        }
+app.delete("/api/users/:id", function(req, res) {
+  
+  const setOrderOfIdInObject = (arrayOfObjects) => {
+    let count = 1;
+    arrayOfObjects.forEach((obj) => obj.id = count++);
+  }
+
+  let id = req.params.id.slice(1);
+  let data = fs.readFileSync("users.json", "utf8");
+  let users = JSON.parse(data);
+  let index = -1;
+  // находим индекс пользователя в массиве
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].id == id) {
+      index = i;
+      break;
     }
-    if(index > -1){
-        // удаляем пользователя из массива по индексу
-        let user = users.splice(index, 1)[0];
-        let data = JSON.stringify(users);
-        fs.writeFileSync("users.json", data);
-        // отправляем удаленного пользователя
-        res.send(user);
-    }
-    else{
-        res.status(404).send();
-    }
+  }
+  if (index > -1) {
+    // удаляем пользователя из массива по индексу
+    let user = users.splice(index, 1)[0];
+    setOrderOfIdInObject(users);
+    let data = JSON.stringify(users);
+    fs.writeFileSync("users.json", data);
+    // отправляем удаленного пользователя
+    res.send(user);
+  } else {
+    res.status(404).send();
+  }
 });
 
-app.put("/api/users", jsonParser, function(req, res){
-  if(!req.body) return res.sendStatus(400);
+app.put("/api/users", jsonParser, function(req, res) {
+  if (!req.body) return res.sendStatus(400);
   let userId = req.body.id;
   let userName = req.body.name;
   let userAge = req.body.age;
   let data = fs.readFileSync("users.json", "utf8");
   let users = JSON.parse(data);
   let user;
-  for(let i = 0; i < users.length; i++){
-    if(users[i].id == userId){
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].id == userId) {
       user = users[i];
       break;
     }
   }
-  if(user){
+  if (user) {
     user.age = userAge;
     user.name = userName;
     let data = JSON.stringify(users);
     fs.writeFileSync("users.json", data);
     res.send(user);
-  }
-  else{
-      res.status(404).send(user);
+  } else {
+    res.status(404).send(user);
   }
 });
 
